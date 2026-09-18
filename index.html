@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CIDR Calculator</title><style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#090b10;color:#e8eaf0;font:15px system-ui;min-height:100vh;display:grid;place-items:center}.wrap{width:min(900px,94vw);padding:28px;border:1px solid #252a36;border-radius:22px;background:#0e1118;box-shadow:0 20px 80px #0008}h1{margin:0 0 8px;font-size:30px}p{color:#9aa2b2}.row{display:flex;gap:10px;margin:22px 0}.row input,.row button{padding:14px;border-radius:12px;border:1px solid #303746;background:#151923;color:inherit;font:inherit}.row input{flex:1}.row button{cursor:pointer}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.card{padding:15px;border:1px solid #252a36;border-radius:14px;background:#11151e}.k{color:#8d96a8;font-size:12px;text-transform:uppercase}.v{margin-top:5px;font-family:ui-monospace,monospace;word-break:break-all}.wm{position:fixed;bottom:9px;right:12px;opacity:.22;font:11px monospace}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.row{flex-direction:column}}
+</style></head><body><div class="wrap"><div class="wm">guns.lol/meduu</div>
+<h1>IPv4 CIDR Calculator</h1><p>Network, broadcast, usable range, masks and host counts. Runs entirely in your browser.</p>
+<div class="row"><input id="ip" value="192.168.1.0/24" spellcheck="false"><button onclick="calc()">Calculate</button></div><div id="out" class="grid"></div></div>
+<script>
+const ip2n=s=>{let a=s.split('.').map(Number);if(a.length!==4||a.some(x=>!Number.isInteger(x)||x<0||x>255))throw Error('Invalid IPv4 address');return (((a[0]*256+a[1])*256+a[2])*256+a[3])>>>0};
+const n2ip=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+function calc(){try{let [addr,pfx]=document.querySelector('#ip').value.trim().split('/');pfx=Number(pfx);if(!Number.isInteger(pfx)||pfx<0||pfx>32)throw Error('Prefix must be 0-32');let n=ip2n(addr), mask=pfx===0?0:(0xffffffff<<(32-pfx))>>>0, network=(n&mask)>>>0,broadcast=(network|(~mask>>>0))>>>0,total=2**(32-pfx),usable=pfx>=31?total:Math.max(0,total-2),first=pfx>=31?network:network+1,last=pfx>=31?broadcast:broadcast-1;let rows=[['Network',n2ip(network)+'/'+pfx],['Broadcast',n2ip(broadcast)],['Subnet mask',n2ip(mask)],['Wildcard mask',n2ip((~mask)>>>0)],['First usable',n2ip(first)],['Last usable',n2ip(last)],['Total addresses',total.toLocaleString()],['Usable hosts',usable.toLocaleString()],['Prefix length','/'+pfx]];document.querySelector('#out').innerHTML=rows.map(([k,v])=>'<div class="card"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>').join('')}catch(e){document.querySelector('#out').innerHTML='<div class="card">'+e.message+'</div>'}}
+calc();
+</script></body></html>
+<!-- by guns.lol/meduu -->
